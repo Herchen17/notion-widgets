@@ -5,48 +5,44 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Countdown</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Inter',-apple-system,sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;background:transparent;color:#37352f;overflow:hidden}
-.countdown-inline{display:flex;align-items:baseline;gap:4px;font-size:16px;font-weight:600;white-space:nowrap;padding:4px 8px}
-.countdown-inline .val{font-variant-numeric:tabular-nums;font-weight:700}
-.countdown-inline .lbl{font-size:12px;font-weight:500;color:#9b9a97;margin-right:6px}
-.countdown-inline .sep{color:#d3d1cb;margin:0 1px;font-weight:300}
-.countdown-inline .done{color:#2eaadc;font-weight:700}
-body.accent-red .val{color:#e03e3e}body.accent-red .done{color:#e03e3e}
-body.accent-blue .val{color:#2eaadc}body.accent-blue .done{color:#2eaadc}
-body.accent-green .val{color:#0f7b6c}body.accent-green .done{color:#0f7b6c}
-body.accent-purple .val{color:#6940a5}body.accent-purple .done{color:#6940a5}
-body.accent-orange .val{color:#d9730d}body.accent-orange .done{color:#d9730d}
-@media(prefers-color-scheme:dark){body{color:#ffffffcf}.val{color:#ffffffcf}.lbl{color:#ffffff52}.sep{color:#ffffff29}}
-.setup{display:flex;flex-direction:column;align-items:center;gap:12px;padding:20px;max-width:340px;width:100%}
-.setup h3{font-size:14px;font-weight:600;color:#37352f}
-.setup label{font-size:12px;font-weight:500;color:#9b9a97;width:100%;text-align:left}
-.setup input,.setup select{width:100%;padding:6px 10px;border:1px solid #e3e2de;border-radius:4px;font-family:inherit;font-size:13px;outline:none}
-.setup input:focus,.setup select:focus{border-color:#2eaadc}
-.setup .row{display:flex;gap:8px;width:100%}
+body{font-family:'Inter',-apple-system,sans-serif;background:transparent;color:#37352f;padding:0;margin:0}
+.cd{font-size:14px;font-weight:400;padding:3px 2px;line-height:1.5;white-space:nowrap}
+.cd .n{font-weight:600;font-variant-numeric:tabular-nums}
+.cd .u{color:#9b9a97;font-size:13px}
+.cd .done{font-weight:600}
+body.accent-red .n,body.accent-red .done{color:#e03e3e}
+body.accent-blue .n,body.accent-blue .done{color:#2eaadc}
+body.accent-green .n,body.accent-green .done{color:#0f7b6c}
+body.accent-purple .n,body.accent-purple .done{color:#6940a5}
+body.accent-orange .n,body.accent-orange .done{color:#d9730d}
+@media(prefers-color-scheme:dark){body{color:#ffffffcf}.cd .n{color:#ffffffcf}.cd .u{color:#ffffff52}}
+.setup{padding:12px;max-width:300px}
+.setup h3{font-size:13px;font-weight:600;margin-bottom:8px}
+.setup label{font-size:11px;font-weight:500;color:#9b9a97;display:block;margin-bottom:2px}
+.setup input,.setup select{width:100%;padding:4px 8px;border:1px solid #e3e2de;border-radius:4px;font-family:inherit;font-size:12px;outline:none;margin-bottom:8px}
+.setup .row{display:flex;gap:6px}
 .setup .row>*{flex:1}
-.setup button{background:#2eaadc;color:#fff;border:none;border-radius:4px;padding:8px 16px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;width:100%}
-.setup button:hover{background:#2899c4}
-.setup .result{font-size:11px;color:#9b9a97;word-break:break-all;background:#f7f6f3;padding:8px;border-radius:4px;width:100%;text-align:center;user-select:all;cursor:text}
+.setup button{background:#2eaadc;color:#fff;border:none;border-radius:4px;padding:6px 12px;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;width:100%}
+.setup .result{font-size:10px;color:#9b9a97;word-break:break-all;background:#f7f6f3;padding:6px;border-radius:4px;margin-top:8px;user-select:all;cursor:text}
 @media(prefers-color-scheme:dark){.setup h3{color:#ffffffcf}.setup input,.setup select{background:#2f3437;border-color:#444;color:#ffffffcf}.setup .result{background:#2f3437;color:#ffffff80}}
 </style>
 </head>
 <body>
 <div id="app"></div>
 <script>
-const params=new URLSearchParams(window.location.search),targetDate=params.get('date'),mode=params.get('mode')||'full',accent=params.get('accent')||'default',app=document.getElementById('app');
-document.body.classList.add('accent-'+accent);
-if(!targetDate){app.innerHTML='<div class="setup"><h3>Set up your countdown</h3><div><label>Date</label><input type="date" id="s-date"></div><div class="row"><div><label>Time (optional)</label><input type="time" id="s-time"></div><div><label>Display</label><select id="s-mode"><option value="full">Days + H:M:S</option><option value="days">Days only</option><option value="hm">Hours + Mins</option><option value="hms">Hours + M + S</option></select></div></div><div><label>Color</label><select id="s-accent"><option value="default">Default</option><option value="blue">Blue</option><option value="red">Red</option><option value="green">Green</option><option value="purple">Purple</option><option value="orange">Orange</option></select></div><button id="s-gen">Generate embed URL</button><div class="result" id="s-result" style="display:none"></div></div>';
-document.getElementById('s-gen').addEventListener('click',function(){const d=document.getElementById('s-date').value,t=document.getElementById('s-time').value,m=document.getElementById('s-mode').value,a=document.getElementById('s-accent').value;if(!d){alert('Pick a date');return}const dt=t?d+'T'+t:d+'T00:00';const base=window.location.origin+window.location.pathname;const url=base+'?date='+encodeURIComponent(dt)+'&mode='+m+'&accent='+a;const res=document.getElementById('s-result');res.style.display='block';res.textContent=url})}
-else{const target=new Date(targetDate);app.innerHTML='<div class="countdown-inline" id="cd"></div>';const cd=document.getElementById('cd');function pad(n){return String(n).padStart(2,'0')}
-function update(){const diff=target-new Date();if(diff<=0){cd.innerHTML='<span class="done">Complete!</span>';return}
-const ts=Math.floor(diff/1000),d=Math.floor(ts/86400),h=Math.floor((ts%86400)/3600),m=Math.floor((ts%3600)/60),s=ts%60;let html='';
-if(mode==='days'){html='<span class="val">'+d+'</span><span class="lbl">'+(d===1?'day':'days')+'</span>'}
-else if(mode==='hm'){const th=Math.floor(ts/3600);html='<span class="val">'+th+'</span><span class="lbl">h</span><span class="sep">:</span><span class="val">'+pad(m)+'</span><span class="lbl">m</span>'}
-else if(mode==='hms'){const th=Math.floor(ts/3600);html='<span class="val">'+th+'</span><span class="lbl">h</span><span class="sep">:</span><span class="val">'+pad(m)+'</span><span class="lbl">m</span><span class="sep">:</span><span class="val">'+pad(s)+'</span><span class="lbl">s</span>'}
-else{if(d>0)html+='<span class="val">'+d+'</span><span class="lbl">'+(d===1?'day':'days')+'</span>';html+='<span class="val">'+pad(h)+'</span><span class="lbl">h</span><span class="sep">:</span><span class="val">'+pad(m)+'</span><span class="lbl">m</span><span class="sep">:</span><span class="val">'+pad(s)+'</span><span class="lbl">s</span>'}
-cd.innerHTML=html}update();setInterval(update,1000)}
+const p=new URLSearchParams(window.location.search),td=p.get('date'),mode=p.get('mode')||'full',accent=p.get('accent')||'default';
+document.body.classList.add('accent-'+accent);const app=document.getElementById('app');
+if(!td){app.innerHTML='<div class="setup"><h3>Set up countdown</h3><div><label>Date</label><input type="date" id="d"></div><div class="row"><div><label>Time</label><input type="time" id="t"></div><div><label>Display</label><select id="m"><option value="full">Days + H:M:S</option><option value="days">Days only</option><option value="hm">Hours:Mins</option><option value="hms">H:M:S</option></select></div></div><div><label>Color</label><select id="a"><option value="default">Default</option><option value="blue">Blue</option><option value="red">Red</option><option value="green">Green</option><option value="purple">Purple</option><option value="orange">Orange</option></select></div><button id="g">Generate URL</button><div class="result" id="r" style="display:none"></div></div>';document.getElementById('g').addEventListener('click',function(){const d=document.getElementById('d').value,t=document.getElementById('t').value,m=document.getElementById('m').value,a=document.getElementById('a').value;if(!d){alert('Pick a date');return}const dt=t?d+'T'+t:d+'T00:00',base=location.origin+location.pathname,url=base+'?date='+encodeURIComponent(dt)+'&mode='+m+'&accent='+a,r=document.getElementById('r');r.style.display='block';r.textContent=url})}
+else{const target=new Date(td);app.innerHTML='<div class="cd" id="c"></div>';const c=document.getElementById('c');function pad(n){return String(n).padStart(2,'0')}
+function update(){const diff=target-new Date();if(diff<=0){c.innerHTML='<span class="done">Complete</span>';return}
+const ts=Math.floor(diff/1000),d=Math.floor(ts/86400),h=Math.floor((ts%86400)/3600),m=Math.floor((ts%3600)/60),s=ts%60;
+if(mode==='days')c.innerHTML='<span class="n">'+d+'</span> <span class="u">'+(d===1?'day':'days')+'</span>';
+else if(mode==='hm'){const th=Math.floor(ts/3600);c.innerHTML='<span class="n">'+th+'</span><span class="u">h</span> <span class="n">'+pad(m)+'</span><span class="u">m</span>'}
+else if(mode==='hms'){const th=Math.floor(ts/3600);c.innerHTML='<span class="n">'+th+'</span><span class="u">h</span> <span class="n">'+pad(m)+'</span><span class="u">m</span> <span class="n">'+pad(s)+'</span><span class="u">s</span>'}
+else{let h2='';if(d>0)h2+='<span class="n">'+d+'</span><span class="u">'+(d===1?' day ':' days ')+'</span>';h2+='<span class="n">'+pad(h)+'</span><span class="u">h</span> <span class="n">'+pad(m)+'</span><span class="u">m</span> <span class="n">'+pad(s)+'</span><span class="u">s</span>';c.innerHTML=h2}}
+update();setInterval(update,1000)}
 </script>
 </body>
 </html>
