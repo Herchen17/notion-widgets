@@ -7,44 +7,46 @@
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Inter',-apple-system,sans-serif;display:flex;align-items:center;justify-content:center;min-height:100vh;background:transparent;color:#37352f}
-.widget{text-align:center;padding:16px 24px;width:100%;max-width:480px}
-.label{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:#9b9a97;margin-bottom:8px}
-.countdown{display:flex;gap:12px;justify-content:center;align-items:baseline}
-.unit{display:flex;flex-direction:column;align-items:center;min-width:56px}
-.value{font-size:36px;font-weight:700;line-height:1.1;font-variant-numeric:tabular-nums}
-.unit-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:#9b9a97;margin-top:2px}
-.separator{font-size:28px;font-weight:300;color:#d3d1cb;align-self:center;margin-bottom:16px}
-.done{font-size:28px;font-weight:700;color:#2eaadc}
-body.accent-red .value,body.accent-red .done{color:#e03e3e}
-body.accent-blue .value,body.accent-blue .done{color:#2eaadc}
-body.accent-green .value,body.accent-green .done{color:#0f7b6c}
-body.accent-purple .value,body.accent-purple .done{color:#6940a5}
-body.accent-orange .value,body.accent-orange .done{color:#d9730d}
-@media(prefers-color-scheme:dark){body{color:#ffffffcf}.value{color:#ffffffcf}.label,.unit-label{color:#ffffff52}.separator{color:#ffffff29}}
+body{font-family:'Inter',-apple-system,sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;background:transparent;color:#37352f;overflow:hidden}
+.countdown-inline{display:flex;align-items:baseline;gap:4px;font-size:16px;font-weight:600;white-space:nowrap;padding:4px 8px}
+.countdown-inline .val{font-variant-numeric:tabular-nums;font-weight:700}
+.countdown-inline .lbl{font-size:12px;font-weight:500;color:#9b9a97;margin-right:6px}
+.countdown-inline .sep{color:#d3d1cb;margin:0 1px;font-weight:300}
+.countdown-inline .done{color:#2eaadc;font-weight:700}
+body.accent-red .val{color:#e03e3e}body.accent-red .done{color:#e03e3e}
+body.accent-blue .val{color:#2eaadc}body.accent-blue .done{color:#2eaadc}
+body.accent-green .val{color:#0f7b6c}body.accent-green .done{color:#0f7b6c}
+body.accent-purple .val{color:#6940a5}body.accent-purple .done{color:#6940a5}
+body.accent-orange .val{color:#d9730d}body.accent-orange .done{color:#d9730d}
+@media(prefers-color-scheme:dark){body{color:#ffffffcf}.val{color:#ffffffcf}.lbl{color:#ffffff52}.sep{color:#ffffff29}}
+.setup{display:flex;flex-direction:column;align-items:center;gap:12px;padding:20px;max-width:340px;width:100%}
+.setup h3{font-size:14px;font-weight:600;color:#37352f}
+.setup label{font-size:12px;font-weight:500;color:#9b9a97;width:100%;text-align:left}
+.setup input,.setup select{width:100%;padding:6px 10px;border:1px solid #e3e2de;border-radius:4px;font-family:inherit;font-size:13px;outline:none}
+.setup input:focus,.setup select:focus{border-color:#2eaadc}
+.setup .row{display:flex;gap:8px;width:100%}
+.setup .row>*{flex:1}
+.setup button{background:#2eaadc;color:#fff;border:none;border-radius:4px;padding:8px 16px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;width:100%}
+.setup button:hover{background:#2899c4}
+.setup .result{font-size:11px;color:#9b9a97;word-break:break-all;background:#f7f6f3;padding:8px;border-radius:4px;width:100%;text-align:center;user-select:all;cursor:text}
+@media(prefers-color-scheme:dark){.setup h3{color:#ffffffcf}.setup input,.setup select{background:#2f3437;border-color:#444;color:#ffffffcf}.setup .result{background:#2f3437;color:#ffffff80}}
 </style>
 </head>
 <body>
-<div class="widget"><div class="label" id="label"></div><div class="countdown" id="countdown"></div></div>
+<div id="app"></div>
 <script>
-const p=new URLSearchParams(window.location.search),targetDate=p.get('date'),mode=p.get('mode')||'full',label=p.get('label')||'',accent=p.get('accent')||'default';
+const params=new URLSearchParams(window.location.search),targetDate=params.get('date'),mode=params.get('mode')||'full',accent=params.get('accent')||'default',app=document.getElementById('app');
 document.body.classList.add('accent-'+accent);
-const labelEl=document.getElementById('label');
-if(label){labelEl.textContent=label}else{labelEl.style.display='none'}
-const c=document.getElementById('countdown');
-if(!targetDate){c.innerHTML='<div style="color:#9b9a97;font-size:14px;">Add ?date=YYYY-MM-DDTHH:MM to URL</div>'}
-else{const target=new Date(targetDate);
-function pad(n){return String(n).padStart(2,'0')}
-function mu(v,l){return'<div class="unit"><div class="value">'+v+'</div><div class="unit-label">'+l+'</div></div>'}
-function sep(){return'<div class="separator">:</div>'}
-function update(){const now=new Date();let diff=target-now;
-if(diff<=0){c.innerHTML='<div class="done">Complete!</div>';return}
+if(!targetDate){app.innerHTML='<div class="setup"><h3>Set up your countdown</h3><div><label>Date</label><input type="date" id="s-date"></div><div class="row"><div><label>Time (optional)</label><input type="time" id="s-time"></div><div><label>Display</label><select id="s-mode"><option value="full">Days + H:M:S</option><option value="days">Days only</option><option value="hm">Hours + Mins</option><option value="hms">Hours + M + S</option></select></div></div><div><label>Color</label><select id="s-accent"><option value="default">Default</option><option value="blue">Blue</option><option value="red">Red</option><option value="green">Green</option><option value="purple">Purple</option><option value="orange">Orange</option></select></div><button id="s-gen">Generate embed URL</button><div class="result" id="s-result" style="display:none"></div></div>';
+document.getElementById('s-gen').addEventListener('click',function(){const d=document.getElementById('s-date').value,t=document.getElementById('s-time').value,m=document.getElementById('s-mode').value,a=document.getElementById('s-accent').value;if(!d){alert('Pick a date');return}const dt=t?d+'T'+t:d+'T00:00';const base=window.location.origin+window.location.pathname;const url=base+'?date='+encodeURIComponent(dt)+'&mode='+m+'&accent='+a;const res=document.getElementById('s-result');res.style.display='block';res.textContent=url})}
+else{const target=new Date(targetDate);app.innerHTML='<div class="countdown-inline" id="cd"></div>';const cd=document.getElementById('cd');function pad(n){return String(n).padStart(2,'0')}
+function update(){const diff=target-new Date();if(diff<=0){cd.innerHTML='<span class="done">Complete!</span>';return}
 const ts=Math.floor(diff/1000),d=Math.floor(ts/86400),h=Math.floor((ts%86400)/3600),m=Math.floor((ts%3600)/60),s=ts%60;let html='';
-if(mode==='days'){html=mu(d,d===1?'day':'days')}
-else if(mode==='hm'){const th=Math.floor(ts/3600);html=mu(th,'hours')+sep()+mu(pad(m),'mins')}
-else if(mode==='hms'){const th=Math.floor(ts/3600);html=mu(th,'hours')+sep()+mu(pad(m),'min')+sep()+mu(pad(s),'sec')}
-else{if(d>0){html+=mu(d,d===1?'day':'days')+sep()}html+=mu(pad(h),'hrs')+sep()+mu(pad(m),'min')+sep()+mu(pad(s),'sec')}
-c.innerHTML=html}update();setInterval(update,1000)}
+if(mode==='days'){html='<span class="val">'+d+'</span><span class="lbl">'+(d===1?'day':'days')+'</span>'}
+else if(mode==='hm'){const th=Math.floor(ts/3600);html='<span class="val">'+th+'</span><span class="lbl">h</span><span class="sep">:</span><span class="val">'+pad(m)+'</span><span class="lbl">m</span>'}
+else if(mode==='hms'){const th=Math.floor(ts/3600);html='<span class="val">'+th+'</span><span class="lbl">h</span><span class="sep">:</span><span class="val">'+pad(m)+'</span><span class="lbl">m</span><span class="sep">:</span><span class="val">'+pad(s)+'</span><span class="lbl">s</span>'}
+else{if(d>0)html+='<span class="val">'+d+'</span><span class="lbl">'+(d===1?'day':'days')+'</span>';html+='<span class="val">'+pad(h)+'</span><span class="lbl">h</span><span class="sep">:</span><span class="val">'+pad(m)+'</span><span class="lbl">m</span><span class="sep">:</span><span class="val">'+pad(s)+'</span><span class="lbl">s</span>'}
+cd.innerHTML=html}update();setInterval(update,1000)}
 </script>
 </body>
 </html>
